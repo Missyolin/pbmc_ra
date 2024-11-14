@@ -72,7 +72,7 @@ plot1 <- DimPlot(merged.pbmc, reduction = "umap", label = TRUE)
 plot2 <- DimPlot(merged.pbmc, reduction = "umap", split.by = "orig.ident")
 plot1|plot2
 plot2
-ggsave("UMAP_cluster_unannotated_SplitbyCondition.png", plot = plot2, width = 8, height = 6, dpi = 300)
+ggsave("UMAP_cluster_unannotated_SplitbyCondition.png", plot = plot2)
 
 #CHAPTER 6 - Finding Gene Marker for each cluster
 library(dplyr)
@@ -105,4 +105,15 @@ ggsave("Feature_Plot_5_major_cell_types.png", plot = featurePlot5)
 # Save merged.pbmc as an RDS file
 saveRDS(merged.pbmc, file = "merged_pbmc.rds")
 
-#
+#Read RDS
+merged.pbmc <- readRDS("D:\\Tugas Akhir\\Seurat\\merged_pbmc.rds")
+View(merged.pbmc@meta.data)
+
+#Rename cluster to 6 big subpopulation (include NKT cell and Dendritic cell)
+levels(merged.pbmc)
+merged.pbmc <- RenameIdents(merged.pbmc, "0" = "T cell", "1" = "T cell", "2" = "Myeloid cell", "3" = "NKT cell", "4" = "T cell", "5" = "B cell", "6" = "NK cell", "7" = "T cell", "8" = "B cell", "9" = "T cell", "10" = "Dendritic cell", "11" = "Platelet")
+
+table(Idents(object = merged.pbmc))
+
+annotated_cluster <- DimPlot(merged.pbmc, label = TRUE)
+ggsave("annotated_cluster_bigSubPopulation.png", plot = annotated_cluster)
