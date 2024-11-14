@@ -4,9 +4,9 @@ suppressWarnings(library(tidyverse))
 suppressWarnings(library(ggplot2))
 
 #CHAPTER 1 - Upload Data
-ctrl_fname <- Read10X_h5("D:\\Tugas Akhir\\Seurat\\ra\\sc5p_v2_hs_PBMC_10k_filtered_feature_bc_matrix.h5")
+ctrl_fname <- Read10X_h5("D:\\Tugas Akhir\\Seurat\\ra\\sc5p_v2_hs_PBMC_10k_filtered_feature_bc_matrix.h5") #10X genomics
 gene_expression_ctrl <- ctrl_fname[["Gene Expression"]]
-ra_fname <- Read10X_h5("D:\\Tugas Akhir\\Seurat\\ra\\GSM4819747_RA_filtered_feature_bc_matrix.h5")
+ra_fname <- Read10X_h5("D:\\Tugas Akhir\\Seurat\\ra\\GSM4819747_RA_filtered_feature_bc_matrix.h5") #NCBI GEO
 
 #Create Seurat Object
 ra <- CreateSeuratObject(counts = ra_fname, project = "RA", min.cells = 3, min.features =200)
@@ -112,8 +112,18 @@ View(merged.pbmc@meta.data)
 #Rename cluster to 6 big subpopulation (include NKT cell and Dendritic cell)
 levels(merged.pbmc)
 merged.pbmc <- RenameIdents(merged.pbmc, "0" = "T cell", "1" = "T cell", "2" = "Myeloid cell", "3" = "NKT cell", "4" = "T cell", "5" = "B cell", "6" = "NK cell", "7" = "T cell", "8" = "B cell", "9" = "T cell", "10" = "Dendritic cell", "11" = "Platelet")
-
 table(Idents(object = merged.pbmc))
 
+#adding column big_subpopulation_labels to merged.pbmc's metadata
+big_subpopulation_labels <- as.vector(Idents(merged.pbmc))
+merged.pbmc@meta.data$big_subpopulation_labels <- big_subpopulation_labels
+
+#visualize the annotated cluster
 annotated_cluster <- DimPlot(merged.pbmc, label = TRUE)
 ggsave("annotated_cluster_bigSubPopulation.png", plot = annotated_cluster)
+
+markers.to.plot <- c("CD3D", "CD3E", "NKG7","KLRD1","CD19", "CD79A", "CD14", "CDKN1C", "PPBP", "PF4")
+dotplot_sample <- DotPlot(merged.pbmc, features = markers.to.plot, cols = c("blue", "red"), dot.scale = 8, split.by = "sample")
+ggsave("dotplot_each cluster_splitby_sample.png", plot = dotplot_sample)
+
+saveRDS(merged.pbmc, file = "D:\\Tugas Akhir\\Seurat\\merged_pbmc.rds")
